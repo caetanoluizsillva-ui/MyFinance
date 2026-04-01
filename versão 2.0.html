@@ -1,0 +1,2649 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Financeiro Mobile v2.0 - Gerenciamento de Categorias</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --pending: #f97316;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding-bottom: 90px;
+            background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent);
+        }
+
+        /* --- HEADER MOBILE --- */
+        .app-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .user-profile { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            cursor: pointer;
+        }
+        
+        .system-icon-profile {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), #4338ca);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+            transition: transform 0.2s;
+        }
+        
+        .system-icon-profile:active {
+            transform: scale(0.95);
+        }
+        
+        .system-icon-profile i {
+            font-size: 1.3rem;
+            color: white;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .greeting {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .month-selector {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 5px 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .month-selector i {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+        
+        .month-selector select {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 5px;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .month-selector select option {
+            background: var(--bg-dark);
+            color: var(--text-main);
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            position: relative;
+        }
+
+        .header-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 10px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .header-btn:active {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .notification-icon-wrapper {
+            position: relative;
+        }
+        
+        .pending-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            font-size: 0.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            padding: 0 4px;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* --- CONTAINERS --- */
+        .container { padding: 0 20px; }
+        
+        /* --- TELAS --- */
+        .home-screen, .ganhos-screen, .despesas-screen, .analise-screen, .config-screen, .contas-screen {
+            display: none;
+        }
+        
+        .home-screen.active, .ganhos-screen.active, .despesas-screen.active, .analise-screen.active, .config-screen.active, .contas-screen.active {
+            display: block;
+        }
+        
+        /* --- TELA INICIAL --- */
+        .add-transaction-card {
+            background: linear-gradient(135deg, var(--primary), #4338ca);
+            padding: 25px 20px;
+            border-radius: 24px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .add-transaction-card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+        
+        .transaction-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .add-btn-large {
+            flex: 1;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .add-btn-large:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-income {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-expense {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-pending {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .form-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .submit-btn:active {
+            background: #4f52e0;
+        }
+        
+        .recent-title {
+            font-size: 1rem;
+            margin: 20px 0 15px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .month-badge {
+            font-size: 0.75rem;
+            background: var(--card-bg);
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: var(--primary);
+        }
+        
+        .recent-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        /* --- ESTILOS PARA CONTAS A PAGAR --- */
+        .pending-item {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.05));
+            border-left: 4px solid var(--warning);
+        }
+        
+        .due-soon {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(244, 63, 94, 0.05));
+            border-left: 4px solid var(--danger);
+            animation: blink 1s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .pay-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-left: 10px;
+        }
+        
+        .pay-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .days-left {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.5);
+            display: inline-block;
+        }
+        
+        .days-left.urgent {
+            color: var(--danger);
+            font-weight: bold;
+        }
+        
+        .transaction-item {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .transaction-item:active {
+            transform: scale(0.98);
+        }
+        
+        .trans-icon {
+            width: 45px; height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .trans-amount {
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        .trans-amount.hidden {
+            filter: blur(6px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        
+        /* --- TELA GANHOS E DESPESAS --- */
+        .category-header {
+            background: linear-gradient(135deg, var(--primary), #4338ca);
+            padding: 20px;
+            border-radius: 24px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .category-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .total-month {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .total-month.hidden {
+            filter: blur(6px);
+        }
+        
+        .total-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        /* --- TELA ANÁLISE --- */
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary), #4338ca);
+            padding: 12px 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+        
+        .balance-label { 
+            font-size: 0.75rem; 
+            opacity: 0.8; 
+        }
+        
+        .balance-value { 
+            font-size: 1.2rem; 
+            font-weight: 700; 
+            margin: 3px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .balance-value.hidden {
+            filter: blur(6px);
+        }
+        
+        .toggle-balance-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .mini-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .mini-card i { margin-bottom: 10px; display: block; }
+        .val { 
+            font-weight: 700; 
+            display: block; 
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+        .val.hidden {
+            filter: blur(6px);
+        }
+        
+        /* Gráficos */
+        .chart-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .chart-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+        
+        .pie-chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 10px auto;
+        }
+        
+        .pie-legend {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            justify-content: space-between;
+            padding: 5px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        
+        .legend-label {
+            flex: 1;
+        }
+        
+        .legend-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        
+        .evolution-chart {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            gap: 20px;
+            min-height: 250px;
+            padding: 20px 0;
+        }
+        
+        .evolution-month {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .evolution-bars {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            height: 150px;
+        }
+        
+        .evolution-bar {
+            width: 35px;
+            background: linear-gradient(180deg, var(--success), #0b8a5c);
+            border-radius: 8px 8px 4px 4px;
+            transition: height 0.5s ease;
+            position: relative;
+        }
+        
+        .evolution-bar.expense {
+            background: linear-gradient(180deg, var(--danger), #c71f3e);
+        }
+        
+        .bar-value-tooltip {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            white-space: nowrap;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .evolution-bar:hover .bar-value-tooltip {
+            display: block;
+        }
+        
+        .evolution-label {
+            font-size: 0.7rem;
+            text-align: center;
+        }
+        
+        .evolution-stats {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        
+        .top-expenses-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .top-expense-item {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .top-expense-rank {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            width: 40px;
+        }
+        
+        .top-expense-info {
+            flex: 1;
+        }
+        
+        .top-expense-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .top-expense-category {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        
+        .top-expense-value {
+            font-weight: 700;
+            color: var(--danger);
+        }
+        
+        .section-title {
+            font-size: 1rem;
+            margin: 15px 0 10px;
+            color: var(--text-muted);
+        }
+        
+        /* --- TELA CONFIGURAÇÕES --- */
+        .config-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 24px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .config-card h3 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .config-field {
+            margin-bottom: 20px;
+        }
+        
+        .config-field label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+        
+        .config-field input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+        
+        .save-config-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+        
+        /* Categorias */
+        .categories-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .category-group {
+            margin-bottom: 25px;
+        }
+        
+        .category-group h4 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .category-item {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .category-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .category-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .category-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .category-actions button:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .edit-category {
+            color: var(--primary);
+        }
+        
+        .delete-category {
+            color: var(--danger);
+        }
+        
+        .add-category-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .add-category-form input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: var(--text-main);
+        }
+        
+        .add-category-form button {
+            padding: 10px 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .add-category-form button:active {
+            background: #4f52e0;
+        }
+        
+        .info-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+        
+        /* --- BOTÕES DE EDIÇÃO E EXCLUSÃO --- */
+        .edit-btn, .save-btn, .cancel-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .edit-btn {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .save-btn {
+            background: var(--success);
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 10px;
+            opacity: 0.6;
+            font-size: 1rem;
+        }
+        
+        .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        .edit-controls {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .transaction-info {
+            flex: 1;
+        }
+        
+        /* --- BOTTOM TAB BAR --- */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 0 20px;
+        }
+        
+        .tab-group-left {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .tab-group-right {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab-item.active { color: var(--primary); }
+        .tab-item i { font-size: 1.3rem; }
+        
+        .app-icon-center {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, var(--primary), #4338ca);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
+            border: 3px solid var(--bg-dark);
+            margin: -25px 0 0 0;
+        }
+        
+        .app-icon-center:active {
+            transform: scale(0.95);
+        }
+        
+        .app-icon-center i {
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .version-tag {
+            position: fixed;
+            bottom: 80px;
+            right: 15px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            z-index: 99;
+            font-family: monospace;
+        }
+        
+        .toast-message {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            font-size: 0.85rem;
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.2s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Tela de login */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-toggle {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.75rem;
+            margin-top: 5px;
+            display: none;
+        }
+        /* Campo com ícone de visualização de senha */
+        .password-wrapper {
+            position: relative;
+        }
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            font-size: 1rem;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-size: 0.85rem;
+        }
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .forgot-password a {
+            color: var(--primary);
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="loginScreen">
+        <div class="form-card" style="width: 90%; max-width: 400px; text-align: center;">
+            <h2 style="margin-bottom: 20px;"><i class="fa-solid fa-lock" style="color:var(--primary)"></i> <span id="authTitle">Financeiro Login</span></h2>
+            <div id="authForm">
+                <div class="form-group" style="text-align: left;">
+                    <label>E-mail</label>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com">
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label>Senha</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" placeholder="******">
+                        <button type="button" class="toggle-password" id="togglePasswordBtn">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Manter conectado</label>
+                </div>
+                <div class="forgot-password">
+                    <a href="#" id="forgotPasswordLink">Esqueceu a senha?</a>
+                </div>
+                <div class="error-msg" id="authError"></div>
+                <button class="submit-btn" id="btnAuthAction">Entrar</button>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: var(--text-muted);">
+                    <span id="authSwitchText">Não tem conta?</span> 
+                    <a href="#" id="btnToggleAuth" style="color: var(--primary);">Cadastre-se</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <header class="app-header">
+        <div class="user-profile" id="openConfigBtn">
+            <div class="system-icon-profile">
+                <i class="fa-solid fa-gear"></i>
+            </div>
+            <div class="user-info">
+                <p class="greeting">Olá, bem-vindo!</p>
+                <p class="user-name" id="userNameDisplay">Usuário Silva</p>
+            </div>
+        </div>
+        
+        <div class="month-selector">
+            <i class="fa-solid fa-calendar-alt"></i>
+            <select id="monthSelector">
+                <option value="2026-01">Janeiro 2026</option>
+                <option value="2026-02">Fevereiro 2026</option>
+                <option value="2026-03">Março 2026</option>
+                <option value="2026-04">Abril 2026</option>
+                <option value="2026-05">Maio 2026</option>
+                <option value="2026-06">Junho 2026</option>
+                <option value="2026-07">Julho 2026</option>
+                <option value="2026-08">Agosto 2026</option>
+                <option value="2026-09">Setembro 2026</option>
+                <option value="2026-10">Outubro 2026</option>
+                <option value="2026-11">Novembro 2026</option>
+                <option value="2026-12">Dezembro 2026</option>
+            </select>
+        </div>
+        
+        <div class="header-actions">
+            <div class="notification-icon-wrapper">
+                <button class="header-btn" id="notifyBtn">
+                    <i class="fa-solid fa-bell"></i>
+                </button>
+                <span class="pending-badge" id="pendingCountBadge" style="display: none;">0</span>
+            </div>
+            <button class="header-btn" id="toggleBalanceBtn">
+                <i class="fa-solid fa-eye"></i>
+            </button>
+            <button class="header-btn" id="logoutBtn" title="Sair">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- TELA INICIAL -->
+    <div id="homeScreen" class="home-screen active">
+        <div class="container">
+            <div class="add-transaction-card">
+                <h2>📝 Registro</h2>
+                <div class="transaction-buttons">
+                    <button class="add-btn-large btn-income" id="showIncomeFormBtn">
+                        <i class="fa-solid fa-arrow-down"></i>
+                        Ganhos
+                    </button>
+                    <button class="add-btn-large btn-expense" id="showExpenseFormBtn">
+                        <i class="fa-solid fa-arrow-up"></i>
+                        Despesas
+                    </button>
+                    <button class="add-btn-large btn-pending" id="showPendingFormBtn">
+                        <i class="fa-solid fa-clock"></i>
+                        A Pagar
+                    </button>
+                </div>
+            </div>
+            
+            <div id="formContainer"></div>
+            
+            <div class="recent-title">
+                <span><i class="fa-solid fa-clock"></i> Últimas movimentações</span>
+                <span class="month-badge" id="currentMonthBadge">Janeiro 2026</span>
+            </div>
+            <div id="recentTransactionsList" class="recent-list"></div>
+        </div>
+    </div>
+
+    <!-- TELA GANHOS -->
+    <div id="ganhosScreen" class="ganhos-screen">
+        <div class="container">
+            <div class="category-header">
+                <h2>💰 Ganhos</h2>
+                <div class="total-label">Total do Mês</div>
+                <div class="total-month" id="totalGanhosMes">R$ 0,00</div>
+            </div>
+            <div id="ganhosList" class="recent-list"></div>
+        </div>
+    </div>
+
+    <!-- TELA DESPESAS -->
+    <div id="despesasScreen" class="despesas-screen">
+        <div class="container">
+            <div class="category-header">
+                <h2>💸 Despesas</h2>
+                <div class="total-label">Total do Mês</div>
+                <div class="total-month" id="totalDespesasMes">R$ 0,00</div>
+            </div>
+            <div id="despesasList" class="recent-list"></div>
+        </div>
+    </div>
+
+    <!-- TELA CONTAS A PAGAR -->
+    <div id="contasScreen" class="contas-screen">
+        <div class="container">
+            <div class="category-header" style="background: linear-gradient(135deg, var(--warning), #ea580c);">
+                <h2>⏰ Contas a Pagar</h2>
+                <div class="total-label">Total Pendente</div>
+                <div class="total-month" id="totalPendingMes">R$ 0,00</div>
+            </div>
+            <div id="pendingList" class="recent-list"></div>
+        </div>
+    </div>
+
+    <!-- TELA ANÁLISE -->
+    <div id="analiseScreen" class="analise-screen">
+        <div class="container">
+            <div class="balance-card">
+                <div class="balance-header">
+                    <p class="balance-label">Saldo Total Disponível</p>
+                    <button class="toggle-balance-btn" id="toggleBalanceInlineBtn">
+                        <i class="fa-solid fa-eye-slash"></i>
+                        <span>Ocultar</span>
+                    </button>
+                </div>
+                <h2 class="balance-value" id="balanceValue">R$ 0,00</h2>
+                <p style="font-size: 0.65rem; opacity: 0.8;">Atualizado em tempo real</p>
+            </div>
+            
+            <div class="stats-row">
+                <div class="mini-card">
+                    <i class="fa-solid fa-arrow-down" style="color: var(--success);"></i>
+                    <span class="balance-label">Total Ganhos</span>
+                    <span class="val" id="totalEarningsValue" style="color: var(--success);">R$ 0,00</span>
+                </div>
+                <div class="mini-card">
+                    <i class="fa-solid fa-arrow-up" style="color: var(--danger);"></i>
+                    <span class="balance-label">Total Despesas</span>
+                    <span class="val" id="totalExpensesValue" style="color: var(--danger);">R$ 0,00</span>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Despesas por Categoria</span>
+                </div>
+                <div id="expensePieChart" class="pie-chart-container"></div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Ganhos por Categoria</span>
+                </div>
+                <div id="incomePieChart" class="pie-chart-container"></div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Evolução Últimos 3 Meses</span>
+                </div>
+                <div id="evolutionChart"></div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-title">
+                    <i class="fa-solid fa-ranking-star"></i>
+                    <span>Top 5 Maiores Despesas</span>
+                </div>
+                <div id="topExpensesList"></div>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 class="section-title" style="margin:0;">Histórico Completo</h3>
+            </div>
+            <div id="allTransactionsList" class="recent-list"></div>
+        </div>
+    </div>
+
+    <!-- TELA CONFIGURAÇÕES -->
+    <div id="configScreen" class="config-screen">
+        <div class="container">
+            <div class="config-card">
+                <h3><i class="fa-solid fa-user"></i> Perfil</h3>
+                <div class="config-field">
+                    <label><i class="fa-solid fa-user"></i> Nome do usuário</label>
+                    <input type="text" id="userNameInput" placeholder="Digite seu nome">
+                </div>
+                <button class="save-config-btn" id="saveConfigBtn">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar configurações
+                </button>
+            </div>
+            
+            <div class="config-card">
+                <h3><i class="fa-solid fa-tags"></i> Gerenciar Categorias</h3>
+                
+                <div class="category-group">
+                    <h4>📊 Categorias de Despesas e Contas a Pagar</h4>
+                    <div id="expenseCategoriesList" class="category-list"></div>
+                    <div class="add-category-form">
+                        <input type="text" id="newExpenseCategory" placeholder="Nova categoria...">
+                        <button id="addExpenseCategoryBtn"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+                
+                <div class="category-group">
+                    <h4>💰 Categorias de Ganhos</h4>
+                    <div id="incomeCategoriesList" class="category-list"></div>
+                    <div class="add-category-form">
+                        <input type="text" id="newIncomeCategory" placeholder="Nova categoria...">
+                        <button id="addIncomeCategoryBtn"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+                
+                <div class="info-text">
+                    <i class="fa-solid fa-info-circle"></i> As categorias padrão não podem ser removidas. Você pode adicionar, editar ou remover suas próprias categorias.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="version-tag">
+        v2.0 • Financeiro Mobile
+    </div>
+
+    <nav class="tab-bar">
+        <div class="tab-group-left">
+            <div class="tab-item" data-tab="ganhos">
+                <i class="fa-solid fa-arrow-down"></i>
+                <span>Ganhos</span>
+            </div>
+            <div class="tab-item" data-tab="analise">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Análise</span>
+            </div>
+        </div>
+        
+        <div class="app-icon-center" data-tab="home">
+            <i class="fa-solid fa-house"></i>
+        </div>
+        
+        <div class="tab-group-right">
+            <div class="tab-item" data-tab="despesas">
+                <i class="fa-solid fa-arrow-up"></i>
+                <span>Despesas</span>
+            </div>
+            <div class="tab-item" data-tab="contas">
+                <i class="fa-solid fa-clock"></i>
+                <span>A Pagar</span>
+            </div>
+        </div>
+    </nav>
+
+    <div id="toastMsg" class="toast-message"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            onSnapshot, 
+            query, 
+            where, 
+            doc, 
+            deleteDoc, 
+            updateDoc, 
+            setDoc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            onAuthStateChanged, 
+            signOut,
+            sendPasswordResetEmail,
+            setPersistence,
+            browserLocalPersistence,
+            browserSessionPersistence
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2FJvDh9l5YIYYpMf_nlcCKyJKB3bqKeo",
+            authDomain: "myfinance-9f2a8.firebaseapp.com",
+            projectId: "myfinance-9f2a8",
+            storageBucket: "myfinance-9f2a8.firebasestorage.app",
+            messagingSenderId: "626677623833",
+            appId: "1:626677623833:web:3988ad0db5e06c979cce88"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let transactions = [];
+        let pendingBills = [];
+        let userConfig = {
+            userName: "Usuário Silva",
+            expenseCategories: ["Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Outros"],
+            incomeCategories: ["Salário", "Freelance", "Investimentos", "Presente", "Outros"]
+        };
+        let currentMonth = "2026-01";
+        let isBalanceHidden = false;
+        let editingId = null;
+
+        const defaultExpenseCategories = ["Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Outros"];
+        const defaultIncomeCategories = ["Salário", "Freelance", "Investimentos", "Presente", "Outros"];
+
+        const monthNames = {
+            '2026-01': 'Janeiro 2026', '2026-02': 'Fevereiro 2026', '2026-03': 'Março 2026',
+            '2026-04': 'Abril 2026', '2026-05': 'Maio 2026', '2026-06': 'Junho 2026',
+            '2026-07': 'Julho 2026', '2026-08': 'Agosto 2026', '2026-09': 'Setembro 2026',
+            '2026-10': 'Outubro 2026', '2026-11': 'Novembro 2026', '2026-12': 'Dezembro 2026'
+        };
+
+        // Elementos DOM
+        const homeScreen = document.getElementById('homeScreen');
+        const ganhosScreen = document.getElementById('ganhosScreen');
+        const despesasScreen = document.getElementById('despesasScreen');
+        const contasScreen = document.getElementById('contasScreen');
+        const analiseScreen = document.getElementById('analiseScreen');
+        const configScreen = document.getElementById('configScreen');
+        const toast = document.getElementById('toastMsg');
+        const toggleBalanceBtn = document.getElementById('toggleBalanceBtn');
+        const toggleBalanceInlineBtn = document.getElementById('toggleBalanceInlineBtn');
+        const balanceValue = document.getElementById('balanceValue');
+        const totalEarningsValue = document.getElementById('totalEarningsValue');
+        const totalExpensesValue = document.getElementById('totalExpensesValue');
+        const totalGanhosMesEl = document.getElementById('totalGanhosMes');
+        const totalDespesasMesEl = document.getElementById('totalDespesasMes');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const userNameInput = document.getElementById('userNameInput');
+        const monthSelector = document.getElementById('monthSelector');
+        const currentMonthBadge = document.getElementById('currentMonthBadge');
+        const pendingCountBadge = document.getElementById('pendingCountBadge');
+        const openConfigBtn = document.getElementById('openConfigBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        function showToast(message, duration = 2000) {
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        function formatMoney(value) {
+            return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return { year, month, day, fullDate: today };
+        }
+
+        function getCurrentMonthFromDate() {
+            const { year, month } = getTodayDate();
+            if (year === 2026) return `${year}-${month}`;
+            return "2026-01";
+        }
+
+        function getTransactionsByMonth(month) {
+            return transactions.filter(t => t.date.startsWith(month));
+        }
+
+        function getPendingByMonth(month) {
+            return pendingBills.filter(p => p.dueDate.startsWith(month) && !p.paid);
+        }
+
+        function getTotalByType(month, type) {
+            return getTransactionsByMonth(month)
+                .filter(t => t.type === type)
+                .reduce((sum, t) => sum + t.amount, 0);
+        }
+
+        function getTotalPending(month) {
+            return getPendingByMonth(month).reduce((sum, p) => sum + p.amount, 0);
+        }
+
+        function getLastThreeMonths() {
+            const months = [];
+            const currentDate = new Date(currentMonth + '-01');
+            for (let i = 2; i >= 0; i--) {
+                const date = new Date(currentDate);
+                date.setMonth(date.getMonth() - i);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                months.push(`${year}-${month}`);
+            }
+            return months;
+        }
+
+        function getCategoryData(type) {
+            const monthTransactions = getTransactionsByMonth(currentMonth);
+            const filtered = monthTransactions.filter(t => t.type === type);
+            const categories = {};
+            filtered.forEach(t => {
+                categories[t.category] = (categories[t.category] || 0) + t.amount;
+            });
+            return categories;
+        }
+
+        function getTopExpenses(limit = 5) {
+            const monthTransactions = getTransactionsByMonth(currentMonth);
+            const expenses = monthTransactions.filter(t => t.type === 'expense');
+            return expenses.sort((a, b) => b.amount - a.amount).slice(0, limit);
+        }
+
+        function generatePieChart(data, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const entries = Object.entries(data);
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-chart-simple"></i><p>Sem dados para exibir</p></div>';
+                return;
+            }
+            
+            const total = entries.reduce((sum, [, value]) => sum + value, 0);
+            let currentAngle = 0;
+            const colors = ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec489a', '#84cc16', '#f97316', '#6b7280', '#3b82f6'];
+            
+            let conicGradient = 'conic-gradient(from 0deg, ';
+            entries.forEach(([category, value], index) => {
+                const percentage = (value / total) * 360;
+                const color = colors[index % colors.length];
+                conicGradient += `${color} ${currentAngle}deg ${currentAngle + percentage}deg`;
+                if (index < entries.length - 1) conicGradient += ', ';
+                currentAngle += percentage;
+            });
+            conicGradient += ')';
+            
+            let legendHtml = '<div class="pie-legend">';
+            entries.forEach(([category, value], index) => {
+                const percentage = ((value / total) * 100).toFixed(1);
+                const color = colors[index % colors.length];
+                legendHtml += `
+                    <div class="legend-item">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <span class="legend-color" style="background: ${color};"></span>
+                            <span class="legend-label">${category}</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="legend-value">${formatMoney(value)}</div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted);">${percentage}%</div>
+                        </div>
+                    </div>
+                `;
+            });
+            legendHtml += '</div>';
+            
+            container.innerHTML = `
+                <div class="pie-chart" style="background: ${conicGradient};"></div>
+                ${legendHtml}
+            `;
+        }
+
+        function renderEvolutionChart() {
+            const container = document.getElementById('evolutionChart');
+            if (!container) return;
+            
+            const months = getLastThreeMonths();
+            const monthNamesShort = months.map(m => {
+                const [year, month] = m.split('-');
+                return `${month}/${year.slice(2)}`;
+            });
+            
+            const data = months.map(month => ({
+                income: getTotalByType(month, 'income'),
+                expense: getTotalByType(month, 'expense')
+            }));
+            
+            const maxValue = Math.max(...data.flatMap(d => [d.income, d.expense]), 1);
+            const heightMultiplier = 120;
+            
+            let html = '<div class="evolution-chart">';
+            data.forEach((item, index) => {
+                const incomeHeight = (item.income / maxValue) * heightMultiplier;
+                const expenseHeight = (item.expense / maxValue) * heightMultiplier;
+                
+                html += `
+                    <div class="evolution-month">
+                        <div class="evolution-bars">
+                            <div class="evolution-bar" style="height: ${Math.max(incomeHeight, 5)}px;">
+                                <div class="bar-value-tooltip">${formatMoney(item.income)}</div>
+                            </div>
+                            <div class="evolution-bar expense" style="height: ${Math.max(expenseHeight, 5)}px;">
+                                <div class="bar-value-tooltip">${formatMoney(item.expense)}</div>
+                            </div>
+                        </div>
+                        <div class="evolution-label">${monthNamesShort[index]}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            html += `
+                <div class="evolution-stats">
+                    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 10px;">
+                        <div><span style="background: var(--success); width: 12px; height: 12px; display: inline-block; border-radius: 2px;"></span> Ganhos</div>
+                        <div><span style="background: var(--danger); width: 12px; height: 12px; display: inline-block; border-radius: 2px;"></span> Despesas</div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function renderTopExpenses() {
+            const container = document.getElementById('topExpensesList');
+            if (!container) return;
+            
+            const topExpenses = getTopExpenses(5);
+            if (topExpenses.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-chart-line"></i><p>Nenhuma despesa registrada</p></div>';
+                return;
+            }
+            
+            let html = '<div class="top-expenses-list">';
+            topExpenses.forEach((expense, index) => {
+                html += `
+                    <div class="top-expense-item">
+                        <div class="top-expense-rank">#${index + 1}</div>
+                        <div class="top-expense-info">
+                            <div class="top-expense-name">${expense.description}</div>
+                            <div class="top-expense-category">${expense.category} • ${new Date(expense.date).toLocaleDateString('pt-BR')}</div>
+                        </div>
+                        <div class="top-expense-value">${formatMoney(expense.amount)}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function updateTotals() {
+            const totalGanhosMes = getTotalByType(currentMonth, 'income');
+            const totalDespesasMes = getTotalByType(currentMonth, 'expense');
+            const totalPendingMes = getTotalPending(currentMonth);
+            const saldoTotal = totalGanhosMes - totalDespesasMes;
+            
+            if (totalGanhosMesEl) totalGanhosMesEl.textContent = formatMoney(totalGanhosMes);
+            if (totalDespesasMesEl) totalDespesasMesEl.textContent = formatMoney(totalDespesasMes);
+            if (balanceValue) balanceValue.textContent = formatMoney(saldoTotal);
+            if (totalEarningsValue) totalEarningsValue.textContent = formatMoney(totalGanhosMes);
+            if (totalExpensesValue) totalExpensesValue.textContent = formatMoney(totalDespesasMes);
+            
+            const totalPendingEl = document.getElementById('totalPendingMes');
+            if (totalPendingEl) totalPendingEl.textContent = formatMoney(totalPendingMes);
+            
+            const totalElements = [
+                balanceValue, totalEarningsValue, totalExpensesValue,
+                totalGanhosMesEl, totalDespesasMesEl
+            ];
+            totalElements.forEach(el => {
+                if (el) {
+                    if (isBalanceHidden) el.classList.add('hidden');
+                    else el.classList.remove('hidden');
+                }
+            });
+        }
+
+        function checkDueDates() {
+            const today = getTodayDate().fullDate;
+            const urgentBills = pendingBills.filter(bill => {
+                if (bill.paid) return false;
+                const dueDate = new Date(bill.dueDate);
+                const diffTime = dueDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 3 && diffDays >= 0;
+            });
+            
+            if (urgentBills.length > 0) {
+                pendingCountBadge.style.display = 'flex';
+                pendingCountBadge.textContent = urgentBills.length;
+            } else {
+                pendingCountBadge.style.display = 'none';
+            }
+            
+            if (urgentBills.length === 1) {
+                showToast(`⚠️ Atenção! Conta a vencer em até 3 dias: ${urgentBills[0].description}`, 5000);
+            } else if (urgentBills.length > 1) {
+                showToast(`⚠️ Atenção! ${urgentBills.length} contas vencem em até 3 dias!`, 5000);
+            }
+        }
+
+        function renderRecentTransactions() {
+            const recentList = document.getElementById('recentTransactionsList');
+            if (!recentList) return;
+            
+            const monthTransactions = getTransactionsByMonth(currentMonth);
+            const recent = [...monthTransactions].reverse().slice(0, 15);
+            
+            if (recent.length === 0) {
+                recentList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-receipt"></i><p>Nenhuma movimentação neste mês</p></div>';
+                return;
+            }
+            
+            recentList.innerHTML = recent.map(t => `
+                <div class="transaction-item" data-id="${t.id}" data-type="transaction">
+                    <div style="display:flex; gap:12px; align-items:center; flex:1;">
+                        <div class="trans-icon"><i class="fa-solid ${t.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}" style="color: ${t.type === 'income' ? 'var(--success)' : 'var(--danger)'};"></i></div>
+                        <div class="transaction-info">
+                            <p style="font-weight:600;">${t.description}</p>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">${t.category} • ${new Date(t.date).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    </div>
+                    <p class="trans-amount" style="font-weight:700; color:${t.type === 'income' ? 'var(--success)' : 'var(--danger)'};">
+                        ${t.type === 'income' ? '+' : '-'} ${formatMoney(t.amount)}
+                    </p>
+                </div>
+            `).join('');
+            
+            if (isBalanceHidden) {
+                document.querySelectorAll('#recentTransactionsList .trans-amount').forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        function renderAllTransactions() {
+            const allList = document.getElementById('allTransactionsList');
+            if (!allList) return;
+            
+            const monthTransactions = getTransactionsByMonth(currentMonth);
+            if (monthTransactions.length === 0) {
+                allList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Nenhuma transação registrada neste mês</p></div>';
+                return;
+            }
+            
+            const sorted = [...monthTransactions].reverse();
+            allList.innerHTML = sorted.map(t => `
+                <div class="transaction-item" data-id="${t.id}" data-type="transaction">
+                    <div style="display:flex; gap:12px; align-items:center; flex:1;">
+                        <div class="trans-icon"><i class="fa-solid ${t.type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up'}" style="color: ${t.type === 'income' ? 'var(--success)' : 'var(--danger)'};"></i></div>
+                        <div class="transaction-info">
+                            <p style="font-weight:600;">${t.description}</p>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">${t.category} • ${new Date(t.date).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <p class="trans-amount" style="font-weight:700; color:${t.type === 'income' ? 'var(--success)' : 'var(--danger)'};">
+                            ${t.type === 'income' ? '+' : '-'} ${formatMoney(t.amount)}
+                        </p>
+                        <button class="delete-btn" data-id="${t.id}" data-type="transaction"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            
+            if (isBalanceHidden) {
+                document.querySelectorAll('#allTransactionsList .trans-amount').forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        function renderGanhos() {
+            const list = document.getElementById('ganhosList');
+            if (!list) return;
+            
+            const monthTransactions = getTransactionsByMonth(currentMonth);
+            const ganhos = monthTransactions.filter(t => t.type === 'income').reverse();
+            if (ganhos.length === 0) {
+                list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Nenhum ganho registrado neste mês</p></div>';
+                return;
+            }
+            
+            list.innerHTML = ganhos.map(t => `
+                <div class="transaction-item" data-id="${t.id}" data-type="transaction">
+                    <div style="display:flex; gap:12px; align-items:center; flex:1;">
+                        <div class="trans-icon"><i class="fa-solid fa-arrow-down" style="color: var(--success);"></i></div>
+                        <div class="transaction-info">
+                            <p style="font-weight:600;">${t.description}</p>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">${t.category} • ${new Date(t.date).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <p class="trans-amount" style="font-weight:700; color:var(--success);">
+                            + ${formatMoney(t.amount)}
+                        </p>
+                        <div class="edit-controls">
+                            <button class="edit-btn" data-id="${t.id}" data-type="transaction"><i class="fa-solid fa-pen"></i></button>
+                            <button class="delete-btn" data-id="${t.id}" data-type="transaction"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            if (isBalanceHidden) {
+                document.querySelectorAll('#ganhosList .trans-amount').forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        function renderDespesas() {
+            const list = document.getElementById('despesasList');
+            if (!list) return;
+            
+            const monthTransactions = getTransactionsByMonth(currentMonth);
+            const despesas = monthTransactions.filter(t => t.type === 'expense').reverse();
+            if (despesas.length === 0) {
+                list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Nenhuma despesa registrada neste mês</p></div>';
+                return;
+            }
+            
+            list.innerHTML = despesas.map(t => `
+                <div class="transaction-item" data-id="${t.id}" data-type="transaction">
+                    <div style="display:flex; gap:12px; align-items:center; flex:1;">
+                        <div class="trans-icon"><i class="fa-solid fa-arrow-up" style="color: var(--danger);"></i></div>
+                        <div class="transaction-info">
+                            <p style="font-weight:600;">${t.description}</p>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">${t.category} • ${new Date(t.date).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <p class="trans-amount" style="font-weight:700; color:var(--danger);">
+                            - ${formatMoney(t.amount)}
+                        </p>
+                        <div class="edit-controls">
+                            <button class="edit-btn" data-id="${t.id}" data-type="transaction"><i class="fa-solid fa-pen"></i></button>
+                            <button class="delete-btn" data-id="${t.id}" data-type="transaction"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            if (isBalanceHidden) {
+                document.querySelectorAll('#despesasList .trans-amount').forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        function renderPendingBills() {
+            const list = document.getElementById('pendingList');
+            if (!list) return;
+            
+            const monthPending = getPendingByMonth(currentMonth);
+            if (monthPending.length === 0) {
+                list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-check-circle"></i><p>Nenhuma conta a pagar neste mês!</p></div>';
+                return;
+            }
+            
+            const today = getTodayDate().fullDate;
+            
+            list.innerHTML = monthPending.map(p => {
+                const dueDate = new Date(p.dueDate);
+                const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                const isUrgent = diffDays <= 3 && diffDays >= 0;
+                const isOverdue = diffDays < 0;
+                
+                let statusClass = '';
+                let daysText = '';
+                
+                if (isOverdue) {
+                    statusClass = 'due-soon';
+                    daysText = `<span class="days-left urgent">⚠️ Vencida há ${Math.abs(diffDays)} dias</span>`;
+                } else if (isUrgent) {
+                    statusClass = 'due-soon';
+                    daysText = `<span class="days-left urgent">⏰ Vence em ${diffDays} dias</span>`;
+                } else {
+                    daysText = `<span class="days-left">📅 Vence em ${diffDays} dias</span>`;
+                }
+                
+                return `
+                    <div class="transaction-item ${statusClass}" data-id="${p.id}" data-type="pending">
+                        <div style="display:flex; gap:12px; align-items:center; flex:1;">
+                            <div class="trans-icon"><i class="fa-solid fa-clock" style="color: var(--warning);"></i></div>
+                            <div class="transaction-info">
+                                <p style="font-weight:600;">${p.description}</p>
+                                <p style="font-size:0.75rem; color:var(--text-muted);">${p.category} • Vencimento: ${new Date(p.dueDate).toLocaleDateString('pt-BR')}</p>
+                                ${daysText}
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <p class="trans-amount" style="font-weight:700; color:var(--warning);">
+                                ${formatMoney(p.amount)}
+                            </p>
+                            <button class="pay-btn" data-id="${p.id}" data-type="pending"><i class="fa-solid fa-check"></i> Pagar</button>
+                            <div class="edit-controls">
+                                <button class="edit-btn" data-id="${p.id}" data-type="pending"><i class="fa-solid fa-pen"></i></button>
+                                <button class="delete-btn" data-id="${p.id}" data-type="pending"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (isBalanceHidden) {
+                document.querySelectorAll('#pendingList .trans-amount').forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        // CRUD com userId
+        async function addTransaction(type, description, amount, category, day) {
+            if (!currentUser) return;
+            const dayStr = String(day).padStart(2, '0');
+            const newDate = `${currentMonth}-${dayStr}T12:00:00`;
+            const data = {
+                type,
+                description,
+                amount: parseFloat(amount),
+                category,
+                date: newDate,
+                userId: currentUser.uid,
+                createdAt: new Date()
+            };
+            try {
+                await addDoc(collection(db, "transactions"), data);
+                showToast(`✅ ${type === 'income' ? 'Ganho' : 'Despesa'} adicionado!`);
+            } catch (e) {
+                console.error(e);
+                showToast("❌ Erro ao adicionar transação");
+            }
+        }
+
+        async function addPendingBill(description, amount, category, dueDay) {
+            if (!currentUser) return;
+            const dayStr = String(dueDay).padStart(2, '0');
+            const dueDate = `${currentMonth}-${dayStr}`;
+            const data = {
+                description,
+                amount: parseFloat(amount),
+                category,
+                dueDate,
+                paid: false,
+                userId: currentUser.uid,
+                createdAt: new Date()
+            };
+            try {
+                await addDoc(collection(db, "pendingBills"), data);
+                showToast(`⏰ Conta a pagar adicionada: ${description}`);
+            } catch (e) {
+                console.error(e);
+                showToast("❌ Erro ao adicionar conta a pagar");
+            }
+        }
+
+        async function markAsPaid(id) {
+            if (!currentUser) return;
+            if (confirm('Marcar esta conta como paga? Ela será movida para o histórico de despesas.')) {
+                const bill = pendingBills.find(p => p.id === id);
+                if (bill) {
+                    try {
+                        const newTransaction = {
+                            type: 'expense',
+                            description: bill.description,
+                            amount: bill.amount,
+                            category: bill.category,
+                            date: `${bill.dueDate}T12:00:00`,
+                            userId: currentUser.uid,
+                            createdAt: new Date()
+                        };
+                        await addDoc(collection(db, "transactions"), newTransaction);
+                        await deleteDoc(doc(db, "pendingBills", id));
+                        showToast(`✅ Conta paga: ${bill.description}`);
+                    } catch (e) {
+                        console.error(e);
+                        showToast("❌ Erro ao marcar como paga");
+                    }
+                }
+            }
+        }
+
+        async function deleteTransaction(id) {
+            if (!currentUser) return;
+            if (confirm('Tem certeza que deseja excluir esta transação?')) {
+                try {
+                    await deleteDoc(doc(db, "transactions", id));
+                    showToast('🗑️ Transação removida');
+                } catch (e) {
+                    console.error(e);
+                    showToast("❌ Erro ao excluir transação");
+                }
+            }
+        }
+
+        async function deletePending(id) {
+            if (!currentUser) return;
+            if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
+                try {
+                    await deleteDoc(doc(db, "pendingBills", id));
+                    showToast('🗑️ Conta removida da lista');
+                } catch (e) {
+                    console.error(e);
+                    showToast("❌ Erro ao excluir conta");
+                }
+            }
+        }
+
+        async function updateTransaction(id, newData) {
+            if (!currentUser) return;
+            try {
+                await updateDoc(doc(db, "transactions", id), newData);
+                showToast('✏️ Transação editada com sucesso!');
+            } catch (e) {
+                console.error(e);
+                showToast("❌ Erro ao editar transação");
+            }
+        }
+
+        // Função de edição (início) - refatorada para usar o elemento pai diretamente
+        function startEdit(button) {
+            const itemDiv = button.closest('.transaction-item');
+            if (!itemDiv) return;
+            
+            const id = itemDiv.getAttribute('data-id');
+            const type = itemDiv.getAttribute('data-type');
+            
+            if (editingId === id) return;
+            editingId = id;
+            
+            let transaction;
+            if (type === 'pending') {
+                transaction = pendingBills.find(t => t.id === id);
+            } else {
+                transaction = transactions.find(t => t.id === id);
+            }
+            if (!transaction) return;
+            
+            const infoDiv = itemDiv.querySelector('.transaction-info');
+            const controlsDiv = itemDiv.querySelector('.edit-controls');
+            const amountP = itemDiv.querySelector('.trans-amount');
+            
+            const currentDesc = transaction.description;
+            const currentCategory = transaction.category;
+            const currentAmount = transaction.amount;
+            const categories = (type === 'pending' || transaction.type === 'expense') ? userConfig.expenseCategories : userConfig.incomeCategories;
+            
+            infoDiv.innerHTML = `
+                <input type="text" id="edit-desc-${id}" value="${currentDesc.replace(/"/g, '&quot;')}" style="width:100%; margin-bottom:5px; background:rgba(255,255,255,0.9); color:#000; padding:8px; border-radius:8px;">
+                <select id="edit-cat-${id}" style="width:100%; background:rgba(255,255,255,0.9); color:#000; padding:8px; border-radius:8px;">
+                    ${categories.map(cat => `<option ${cat === currentCategory ? 'selected' : ''}>${cat}</option>`).join('')}
+                </select>
+            `;
+            
+            amountP.innerHTML = `
+                <input type="number" id="edit-amount-${id}" value="${currentAmount}" step="0.01" style="width:100px; padding:8px; border-radius:8px; background:rgba(255,255,255,0.9); color:#000;">
+            `;
+            
+            controlsDiv.innerHTML = `
+                <button class="save-btn" data-id="${id}" data-type="${type}"><i class="fa-solid fa-check"></i></button>
+                <button class="cancel-btn" data-id="${id}" data-type="${type}"><i class="fa-solid fa-times"></i></button>
+            `;
+        }
+
+        async function saveEdit(button) {
+            const itemDiv = button.closest('.transaction-item');
+            if (!itemDiv) return;
+            
+            const id = itemDiv.getAttribute('data-id');
+            const type = itemDiv.getAttribute('data-type');
+            
+            const newDesc = document.getElementById(`edit-desc-${id}`).value;
+            const newCategory = document.getElementById(`edit-cat-${id}`).value;
+            const newAmount = parseFloat(document.getElementById(`edit-amount-${id}`).value);
+            
+            if (!newDesc || !newAmount || newAmount <= 0) {
+                showToast('Por favor, preencha todos os campos corretamente');
+                return;
+            }
+            
+            if (type === 'pending') {
+                const bill = pendingBills.find(p => p.id === id);
+                if (bill) {
+                    try {
+                        await updateDoc(doc(db, "pendingBills", id), {
+                            description: newDesc,
+                            category: newCategory,
+                            amount: newAmount
+                        });
+                        showToast('✏️ Conta editada com sucesso!');
+                    } catch (e) {
+                        console.error(e);
+                        showToast("❌ Erro ao editar conta");
+                    }
+                }
+            } else {
+                await updateTransaction(id, {
+                    description: newDesc,
+                    category: newCategory,
+                    amount: newAmount
+                });
+            }
+            editingId = null;
+        }
+
+        function cancelEdit(button) {
+            editingId = null;
+            refreshAllData();
+        }
+
+        // Configurações do usuário com base no uid
+        async function loadUserConfig(uid) {
+            if (!uid) return;
+            const settingsRef = doc(db, "settings", uid);
+            try {
+                const docSnap = await getDoc(settingsRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    userConfig.userName = data.userName || "Usuário Silva";
+                    userConfig.expenseCategories = data.expenseCategories || [...defaultExpenseCategories];
+                    userConfig.incomeCategories = data.incomeCategories || [...defaultIncomeCategories];
+                } else {
+                    await setDoc(settingsRef, {
+                        userName: "Usuário Silva",
+                        expenseCategories: defaultExpenseCategories,
+                        incomeCategories: defaultIncomeCategories
+                    });
+                }
+                updateUserInterface();
+                renderCategories();
+            } catch (e) {
+                console.error("Erro ao carregar configurações:", e);
+            }
+        }
+
+        async function saveUserConfig() {
+            if (!currentUser) return;
+            const newName = userNameInput.value.trim();
+            if (!newName) {
+                showToast('Por favor, digite um nome válido');
+                return;
+            }
+            userConfig.userName = newName;
+            const settingsRef = doc(db, "settings", currentUser.uid);
+            try {
+                await setDoc(settingsRef, {
+                    userName: userConfig.userName,
+                    expenseCategories: userConfig.expenseCategories,
+                    incomeCategories: userConfig.incomeCategories
+                });
+                updateUserInterface();
+                showToast('✅ Configurações salvas na nuvem!');
+            } catch (e) {
+                console.error(e);
+                showToast('❌ Erro ao salvar configurações');
+            }
+        }
+
+        async function addCategory(type, categoryName) {
+            if (!categoryName || !categoryName.trim()) {
+                showToast('Por favor, digite um nome para a categoria');
+                return false;
+            }
+            const categoryList = type === 'expense' ? userConfig.expenseCategories : userConfig.incomeCategories;
+            const categoryNameTrimmed = categoryName.trim();
+            if (categoryList.includes(categoryNameTrimmed)) {
+                showToast('⚠️ Esta categoria já existe!');
+                return false;
+            }
+            categoryList.push(categoryNameTrimmed);
+            await saveUserConfig();
+            renderCategories();
+            showToast(`✅ Categoria "${categoryNameTrimmed}" adicionada!`);
+            return true;
+        }
+
+        async function editCategory(type, oldName) {
+            const newName = prompt(`Editar categoria "${oldName}"`, oldName);
+            if (newName && newName.trim() && newName !== oldName) {
+                const categoryList = type === 'expense' ? userConfig.expenseCategories : userConfig.incomeCategories;
+                const index = categoryList.indexOf(oldName);
+                if (index !== -1) {
+                    categoryList[index] = newName.trim();
+                    await saveUserConfig();
+                    
+                    const updatePromises = [];
+                    transactions.forEach(t => {
+                        if (t.category === oldName && t.type === (type === 'expense' ? 'expense' : 'income')) {
+                            updatePromises.push(updateDoc(doc(db, "transactions", t.id), { category: newName.trim() }));
+                        }
+                    });
+                    pendingBills.forEach(p => {
+                        if (p.category === oldName) {
+                            updatePromises.push(updateDoc(doc(db, "pendingBills", p.id), { category: newName.trim() }));
+                        }
+                    });
+                    await Promise.all(updatePromises);
+                    showToast(`✅ Categoria "${oldName}" alterada para "${newName}"`);
+                }
+            }
+        }
+
+        async function deleteCategory(type, category) {
+            if (confirm(`Tem certeza que deseja remover a categoria "${category}"?\n\nAs transações com esta categoria serão movidas para "Outros".`)) {
+                const categoryList = type === 'expense' ? userConfig.expenseCategories : userConfig.incomeCategories;
+                const index = categoryList.indexOf(category);
+                if (index !== -1) {
+                    categoryList.splice(index, 1);
+                    await saveUserConfig();
+                    
+                    const updatePromises = [];
+                    transactions.forEach(t => {
+                        if (t.category === category && t.type === (type === 'expense' ? 'expense' : 'income')) {
+                            updatePromises.push(updateDoc(doc(db, "transactions", t.id), { category: "Outros" }));
+                        }
+                    });
+                    pendingBills.forEach(p => {
+                        if (p.category === category) {
+                            updatePromises.push(updateDoc(doc(db, "pendingBills", p.id), { category: "Outros" }));
+                        }
+                    });
+                    await Promise.all(updatePromises);
+                    showToast(`🗑️ Categoria "${category}" removida`);
+                }
+            }
+        }
+
+        function renderCategories() {
+            const expenseList = document.getElementById('expenseCategoriesList');
+            const incomeList = document.getElementById('incomeCategoriesList');
+            
+            if (expenseList) {
+                expenseList.innerHTML = userConfig.expenseCategories.map(cat => `
+                    <div class="category-item" data-category="${cat}">
+                        <span class="category-name">${cat}</span>
+                        <div class="category-actions">
+                            ${!defaultExpenseCategories.includes(cat) ? `
+                                <button class="edit-category" data-type="expense" data-category="${cat}"><i class="fa-solid fa-pen"></i></button>
+                                <button class="delete-category" data-type="expense" data-category="${cat}"><i class="fa-solid fa-trash"></i></button>
+                            ` : '<span style="font-size:0.7rem; color:var(--text-muted);">Padrão</span>'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            if (incomeList) {
+                incomeList.innerHTML = userConfig.incomeCategories.map(cat => `
+                    <div class="category-item" data-category="${cat}">
+                        <span class="category-name">${cat}</span>
+                        <div class="category-actions">
+                            ${!defaultIncomeCategories.includes(cat) ? `
+                                <button class="edit-category" data-type="income" data-category="${cat}"><i class="fa-solid fa-pen"></i></button>
+                                <button class="delete-category" data-type="income" data-category="${cat}"><i class="fa-solid fa-trash"></i></button>
+                            ` : '<span style="font-size:0.7rem; color:var(--text-muted);">Padrão</span>'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Listeners com filtro por userId
+        let unsubTransactions = null;
+        let unsubPending = null;
+
+        function listenToTransactions(uid) {
+            if (unsubTransactions) unsubTransactions();
+            const q = query(collection(db, "transactions"), where("userId", "==", uid));
+            unsubTransactions = onSnapshot(q, (snapshot) => {
+                transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                refreshAllData();
+            });
+        }
+
+        function listenToPendingBills(uid) {
+            if (unsubPending) unsubPending();
+            const q = query(collection(db, "pendingBills"), where("userId", "==", uid));
+            unsubPending = onSnapshot(q, (snapshot) => {
+                pendingBills = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                refreshAllData();
+                checkDueDates();
+            });
+        }
+
+        function refreshAllData() {
+            updateTotals();
+            renderRecentTransactions();
+            renderGanhos();
+            renderDespesas();
+            renderPendingBills();
+            renderAllTransactions();
+            
+            const expenseCategories = getCategoryData('expense');
+            const incomeCategories = getCategoryData('income');
+            generatePieChart(expenseCategories, 'expensePieChart');
+            generatePieChart(incomeCategories, 'incomePieChart');
+            renderEvolutionChart();
+            renderTopExpenses();
+        }
+
+        function showForm(type) {
+            const formContainer = document.getElementById('formContainer');
+            const isIncome = type === 'income';
+            const isPending = type === 'pending';
+            const { day: todayDay } = getTodayDate();
+            const categories = isIncome ? userConfig.incomeCategories : (isPending ? userConfig.expenseCategories : userConfig.expenseCategories);
+            
+            formContainer.innerHTML = `
+                <div class="form-card">
+                    <h3 style="margin-bottom:15px; color:${isIncome ? 'var(--success)' : isPending ? 'var(--warning)' : 'var(--danger)'}">
+                        <i class="fa-solid ${isIncome ? 'fa-arrow-down' : isPending ? 'fa-clock' : 'fa-arrow-up'}"></i>
+                        ${isIncome ? 'Adicionar Ganho' : isPending ? 'Adicionar Conta a Pagar' : 'Adicionar Despesa'}
+                    </h3>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="descInput" placeholder="${isPending ? 'Ex: Aluguel, Luz, Internet' : 'Ex: Salário, Aluguel, etc'}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="amountInput" step="0.01" placeholder="0,00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="categorySelect">
+                            ${categories.map(cat => `<option>${cat}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>${isPending ? 'Dia do vencimento' : 'Dia do mês'}</label>
+                        <input type="number" id="dayInput" min="1" max="31" value="${todayDay}" placeholder="Dia" required>
+                    </div>
+                    <button class="submit-btn" id="submitBtn">Adicionar</button>
+                </div>
+            `;
+            
+            document.getElementById('submitBtn').addEventListener('click', () => {
+                const desc = document.getElementById('descInput').value.trim();
+                const amount = document.getElementById('amountInput').value;
+                const category = document.getElementById('categorySelect').value;
+                const day = document.getElementById('dayInput').value;
+                
+                if (!desc || !amount || parseFloat(amount) <= 0 || !day || day < 1 || day > 31) {
+                    showToast('Por favor, preencha todos os campos corretamente');
+                    return;
+                }
+                
+                if (isPending) {
+                    addPendingBill(desc, amount, category, parseInt(day));
+                } else {
+                    addTransaction(type, desc, amount, category, parseInt(day));
+                }
+                formContainer.innerHTML = '';
+            });
+        }
+
+        function changeMonth() {
+            currentMonth = monthSelector.value;
+            updateUserInterface();
+            refreshAllData();
+            showToast(`📅 Visualizando ${monthNames[currentMonth]}`);
+        }
+
+        function toggleBalance() {
+            isBalanceHidden = !isBalanceHidden;
+            const amountElements = document.querySelectorAll('.trans-amount');
+            amountElements.forEach(el => {
+                if (isBalanceHidden) el.classList.add('hidden');
+                else el.classList.remove('hidden');
+            });
+            updateTotals();
+            const toggleIcon = isBalanceHidden ? "fa-eye" : "fa-eye-slash";
+            const toggleText = isBalanceHidden ? "Mostrar" : "Ocultar";
+            if (toggleBalanceBtn) {
+                const icon = toggleBalanceBtn.querySelector('i');
+                if (icon) icon.className = `fa-solid ${toggleIcon}`;
+            }
+            if (toggleBalanceInlineBtn) {
+                const icon = toggleBalanceInlineBtn.querySelector('i');
+                const span = toggleBalanceInlineBtn.querySelector('span');
+                if (icon) icon.className = `fa-solid ${toggleIcon}`;
+                if (span) span.textContent = toggleText;
+            }
+            showToast(isBalanceHidden ? "🔒 Valores ocultados" : "👁️ Valores visíveis");
+        }
+
+        function switchTab(tabName) {
+            homeScreen.classList.remove('active');
+            ganhosScreen.classList.remove('active');
+            despesasScreen.classList.remove('active');
+            contasScreen.classList.remove('active');
+            analiseScreen.classList.remove('active');
+            configScreen.classList.remove('active');
+            
+            if (tabName === 'home') homeScreen.classList.add('active');
+            else if (tabName === 'ganhos') ganhosScreen.classList.add('active');
+            else if (tabName === 'despesas') despesasScreen.classList.add('active');
+            else if (tabName === 'contas') contasScreen.classList.add('active');
+            else if (tabName === 'analise') analiseScreen.classList.add('active');
+            else if (tabName === 'config') {
+                configScreen.classList.add('active');
+                renderCategories();
+            }
+            
+            refreshAllData();
+            
+            document.querySelectorAll('.tab-item, .app-icon-center').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-tab') === tabName) item.classList.add('active');
+            });
+        }
+
+        function updateUserInterface() {
+            userNameDisplay.textContent = userConfig.userName;
+            userNameInput.value = userConfig.userName;
+            currentMonthBadge.textContent = monthNames[currentMonth] || currentMonth;
+        }
+
+        function initializeMonth() {
+            const defaultMonth = getCurrentMonthFromDate();
+            currentMonth = defaultMonth;
+            monthSelector.value = currentMonth;
+            updateUserInterface();
+        }
+
+        // Delegação de eventos para ações dinâmicas
+        function setupEventDelegation() {
+            document.body.addEventListener('click', async (e) => {
+                // Botão de excluir
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    const id = deleteBtn.getAttribute('data-id');
+                    const type = deleteBtn.getAttribute('data-type');
+                    if (type === 'pending') {
+                        await deletePending(id);
+                    } else {
+                        await deleteTransaction(id);
+                    }
+                    return;
+                }
+                
+                // Botão de pagar (contas)
+                const payBtn = e.target.closest('.pay-btn');
+                if (payBtn) {
+                    const id = payBtn.getAttribute('data-id');
+                    await markAsPaid(id);
+                    return;
+                }
+                
+                // Botão de editar
+                const editBtn = e.target.closest('.edit-btn');
+                if (editBtn) {
+                    startEdit(editBtn);
+                    return;
+                }
+                
+                // Botão de salvar (quando em edição)
+                const saveBtn = e.target.closest('.save-btn');
+                if (saveBtn) {
+                    await saveEdit(saveBtn);
+                    return;
+                }
+                
+                // Botão de cancelar (quando em edição)
+                const cancelBtn = e.target.closest('.cancel-btn');
+                if (cancelBtn) {
+                    cancelEdit(cancelBtn);
+                    return;
+                }
+                
+                // Edição de categoria (configurações)
+                const editCatBtn = e.target.closest('.edit-category');
+                if (editCatBtn) {
+                    const type = editCatBtn.getAttribute('data-type');
+                    const category = editCatBtn.getAttribute('data-category');
+                    await editCategory(type, category);
+                    return;
+                }
+                
+                const deleteCatBtn = e.target.closest('.delete-category');
+                if (deleteCatBtn) {
+                    const type = deleteCatBtn.getAttribute('data-type');
+                    const category = deleteCatBtn.getAttribute('data-category');
+                    await deleteCategory(type, category);
+                    return;
+                }
+            });
+        }
+
+        // Autenticação
+        let isRegisterMode = false;
+        const authTitle = document.getElementById('authTitle');
+        const btnAuthAction = document.getElementById('btnAuthAction');
+        const btnToggleAuth = document.getElementById('btnToggleAuth');
+        const authSwitchText = document.getElementById('authSwitchText');
+        const authError = document.getElementById('authError');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const passwordInput = document.getElementById('loginPassword');
+
+        // Mostrar/ocultar senha
+        togglePasswordBtn.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            const icon = togglePasswordBtn.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+
+        // Recuperar senha
+        forgotPasswordLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            if (!email) {
+                authError.textContent = "Digite seu e-mail para recuperar a senha.";
+                authError.style.display = "block";
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showToast(`📧 E-mail de recuperação enviado para ${email}. Verifique sua caixa de entrada.`);
+                authError.style.display = "none";
+            } catch (error) {
+                console.error(error);
+                let msg = "Erro ao enviar e-mail. Verifique o endereço.";
+                if (error.code === 'auth/user-not-found') msg = "Nenhum usuário encontrado com este e-mail.";
+                authError.textContent = msg;
+                authError.style.display = "block";
+            }
+        });
+
+        function setAuthMode(register) {
+            isRegisterMode = register;
+            if (register) {
+                authTitle.textContent = "Criar Conta";
+                btnAuthAction.textContent = "Cadastrar";
+                authSwitchText.textContent = "Já tem conta?";
+                btnToggleAuth.textContent = "Entrar";
+            } else {
+                authTitle.textContent = "Financeiro Login";
+                btnAuthAction.textContent = "Entrar";
+                authSwitchText.textContent = "Não tem conta?";
+                btnToggleAuth.textContent = "Cadastre-se";
+            }
+            authError.style.display = "none";
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            if (!email || !password) {
+                authError.textContent = "Preencha e-mail e senha.";
+                authError.style.display = "block";
+                return;
+            }
+            authError.style.display = "none";
+            
+            // Definir persistência com base no checkbox "Manter conectado"
+            try {
+                if (rememberMeCheckbox.checked) {
+                    await setPersistence(auth, browserLocalPersistence);
+                } else {
+                    await setPersistence(auth, browserSessionPersistence);
+                }
+            } catch (err) {
+                console.warn("Erro ao definir persistência:", err);
+            }
+            
+            try {
+                if (isRegisterMode) {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showToast("Conta criada com sucesso!");
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showToast("Login realizado!");
+                }
+            } catch (error) {
+                console.error(error);
+                let msg = "Erro ao autenticar. Verifique seus dados.";
+                if (error.code === 'auth/user-not-found') msg = "Usuário não encontrado.";
+                else if (error.code === 'auth/wrong-password') msg = "Senha incorreta.";
+                else if (error.code === 'auth/email-already-in-use') msg = "E-mail já cadastrado.";
+                else if (error.code === 'auth/weak-password') msg = "Senha fraca, use pelo menos 6 caracteres.";
+                authError.textContent = msg;
+                authError.style.display = "block";
+            }
+        }
+
+        async function logout() {
+            try {
+                await signOut(auth);
+                showToast("Logout realizado!");
+                transactions = [];
+                pendingBills = [];
+                if (unsubTransactions) unsubTransactions();
+                if (unsubPending) unsubPending();
+            } catch (error) {
+                console.error(error);
+                showToast("Erro ao sair.");
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginScreen').style.display = 'none';
+                initializeMonth();
+                await loadUserConfig(user.uid);
+                listenToTransactions(user.uid);
+                listenToPendingBills(user.uid);
+                switchTab('home');
+            } else {
+                currentUser = null;
+                document.getElementById('loginScreen').style.display = 'flex';
+                if (unsubTransactions) unsubTransactions();
+                if (unsubPending) unsubPending();
+                transactions = [];
+                pendingBills = [];
+                refreshAllData();
+                // Resetar campos de login
+                document.getElementById('loginEmail').value = '';
+                passwordInput.value = '';
+                rememberMeCheckbox.checked = false;
+                authError.style.display = 'none';
+                setAuthMode(false);
+            }
+        });
+
+        btnAuthAction.addEventListener('click', handleAuth);
+        btnToggleAuth.addEventListener('click', (e) => {
+            e.preventDefault();
+            setAuthMode(!isRegisterMode);
+        });
+        logoutBtn.addEventListener('click', logout);
+        setAuthMode(false);
+
+        // Eventos dos botões
+        document.getElementById('showIncomeFormBtn')?.addEventListener('click', () => showForm('income'));
+        document.getElementById('showExpenseFormBtn')?.addEventListener('click', () => showForm('expense'));
+        document.getElementById('showPendingFormBtn')?.addEventListener('click', () => showForm('pending'));
+        document.getElementById('notifyBtn')?.addEventListener('click', () => {
+            const urgentCount = pendingBills.filter(bill => {
+                if (bill.paid) return false;
+                const dueDate = new Date(bill.dueDate);
+                const diffDays = Math.ceil((dueDate - getTodayDate().fullDate) / (1000 * 60 * 60 * 24));
+                return diffDays <= 3 && diffDays >= 0;
+            }).length;
+            if (urgentCount > 0) showToast(`🔔 Você tem ${urgentCount} conta(s) para vencer em até 3 dias!`, 3000);
+            else showToast('🔔 Nenhuma nova notificação de vencimento', 2000);
+        });
+        document.getElementById('saveConfigBtn')?.addEventListener('click', saveUserConfig);
+        toggleBalanceBtn?.addEventListener('click', toggleBalance);
+        toggleBalanceInlineBtn?.addEventListener('click', toggleBalance);
+        monthSelector?.addEventListener('change', changeMonth);
+        openConfigBtn?.addEventListener('click', () => switchTab('config'));
+        
+        document.getElementById('addExpenseCategoryBtn')?.addEventListener('click', () => {
+            const input = document.getElementById('newExpenseCategory');
+            addCategory('expense', input.value).then(() => { input.value = ''; });
+        });
+        document.getElementById('addIncomeCategoryBtn')?.addEventListener('click', () => {
+            const input = document.getElementById('newIncomeCategory');
+            addCategory('income', input.value).then(() => { input.value = ''; });
+        });
+        
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab')));
+        });
+        document.querySelector('.app-icon-center')?.addEventListener('click', () => switchTab('home'));
+        
+        setInterval(checkDueDates, 60000);
+        
+        // Configurar delegação de eventos para botões dinâmicos
+        setupEventDelegation();
+    </script>
+</body>
+</html>
